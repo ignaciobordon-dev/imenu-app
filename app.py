@@ -57,6 +57,10 @@ def pantalla_login() -> None:
                                        type="password", key="pass_r")
                 if st.form_submit_button("Registrarme", type="primary", use_container_width=True):
                     ok, msg = db.sign_up(email_r, pass_r, nombre)
+                    if ok and db.usuario_actual() is not None:
+                        # Supabase no pidió confirmación: ya quedó la sesión abierta.
+                        _flash(msg)
+                        st.rerun()
                     (st.success if ok else st.error)(msg)
 
 
@@ -227,7 +231,6 @@ def _mostrar_flash() -> None:
 
 
 def pantalla_cargar() -> None:
-    _mostrar_flash()
     restaurante = _sel_restaurante("carga_rest")
     if restaurante is None:
         return
@@ -971,6 +974,7 @@ def main() -> None:
     eleccion = st.session_state["nav"]
     pantalla, subtitulo = secciones[eleccion]
     ui.encabezado(eleccion, subtitulo)
+    _mostrar_flash()
     pantalla()
 
 

@@ -66,15 +66,40 @@ def get_client() -> Client:
 # 2. AUTENTICACIÓN
 # ---------------------------------------------------------------------------
 def sign_up(email: str, password: str, full_name: str = "") -> tuple[bool, str]:
+    """Registra un alumno y, si Supabase no exige confirmación, lo deja adentro.
+
+    El mensaje se adapta a la configuración real del proyecto en lugar de
+    suponerla: cuando "Confirm email" está apagado, Supabase devuelve una
+    sesión en el mismo registro y no hay ningún correo que revisar; cuando
+    está encendido, devuelve usuario sin sesión.
+    """
     try:
-        get_client().auth.sign_up(
+        res = get_client().auth.sign_up(
             {
                 "email": email.strip().lower(),
                 "password": password,
                 "options": {"data": {"full_name": full_name.strip()}},
             }
         )
-        return True, "Cuenta creada. Revisá tu correo si pedimos confirmación."
+        if res.user is None:
+            return False, "No se pudo crear la cuenta. Probá de nuevo."
+
+        # Supabase, para no revelar qué correos existen, devuelve un usuario
+        # sin identidades en vez de un error cuando el mail ya está registrado.
+        identidades = getattr(res.user, "identities", None)
+        if identidades is not None and len(identidades) == 0:
+            return False, "Ese correo ya está registrado. Iniciá sesión con tu contraseña."
+
+        if res.session is not None:
+            perfil = _leer_perfil(res.user.id)
+            if perfil is not None:
+                st.session_state.perfil = perfil
+                nombre = perfil.get("full_name") or perfil["email"]
+                return True, f"Cuenta creada. ¡Bienvenido/a, {nombre}!"
+            return True, "Cuenta creada. Ya podés iniciar sesión."
+
+        return True, ("Cuenta creada. Te enviamos un correo de confirmación: "
+                      "abrilo y después volvé a iniciar sesión.")
     except Exception as exc:  # noqa: BLE001
         return False, _mensaje_error(exc)
 
@@ -438,7 +463,18 @@ def _mensaje_error(exc: Exception) -> str:
     if "invalid login credentials" in bajo:
         return "Usuario o contraseña incorrectos."
     if "user already registered" in bajo:
-        return "Ese correo ya está registrado."
+        return "Ese correo ya está registrado. Iniciá sesión con tu contraseña."
+    if ("rate limit" in bajo or "email_send_rate" in bajo
+            or "email send rate" in bajo
+            or "you can only request this after" in bajo):
+        return ("El servicio de correo de Supabase llegó a su límite por hora "
+                "(el incluido solo permite 2). Avisale al docente: hay que "
+                "desactivar la confirmación por correo en Supabase, o esperar "
+                "una hora.")
+    if "password should be at least" in bajo or "weak password" in bajo:
+        return "La contraseña es demasiado corta: usá al menos 6 caracteres."
+    if "invalid email" in bajo or ("email address" in bajo and "invalid" in bajo):
+        return "Ese correo no parece válido."
     if "ck_semana_completa" in bajo:
         return ("El período no abarca semanas completas. La cantidad de días "
                 "tiene que ser múltiplo de 7.")
