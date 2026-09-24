@@ -1,0 +1,4 @@
+-- OBSOLETO — no hace falta ejecutar este archivo.
+-- La corrección del trigger protect_profile_fields() ya está incorporada
+-- dentro de 01_schema_supabase.sql (sección 7).
+-- Podés borrar este archivo.

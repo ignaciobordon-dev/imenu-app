@@ -1,0 +1,16 @@
+# Guardá este archivo como  .streamlit/config.toml
+# Define el tema base oscuro. style.css se aplica encima.
+
+[theme]
+base                     = "dark"
+primaryColor             = "#4a8ff0"
+backgroundColor          = "#0f1218"
+secondaryBackgroundColor = "#171b24"
+textColor                = "#e6e8ec"
+font                     = "sans serif"
+
+[client]
+toolbarMode = "minimal"
+
+[server]
+headless = true

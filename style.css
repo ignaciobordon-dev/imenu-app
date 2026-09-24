@@ -1,0 +1,325 @@
+/* =====================================================================
+   iMenu App — Tema oscuro, estilo panel de control
+   Se inyecta desde Python con ui.cargar_estilos().
+
+   OJO con los selectores: NO usar [class*="st-"] para la tipografía.
+   Streamlit dibuja sus íconos (el ojito de la contraseña, las flechas de
+   los desplegables, la papelera) con la fuente "Material Symbols Rounded"
+   y ligaduras; si se les pisa el font-family, en lugar del ícono aparece
+   la palabra escrita ("visibility") encimada sobre el control.
+   ===================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --bg:          #0f1218;   /* fondo de la app */
+    --card:        #171b24;   /* tarjetas y paneles */
+    --card-alto:   #1d2230;   /* hover y elementos elevados */
+    --borde:       #272d3a;
+    --borde-suave: #202632;
+    --ink:         #e6e8ec;   /* texto principal */
+    --muted:       #98a1b2;   /* texto secundario */
+    --brand:       #4a8ff0;
+    --ok:          #199e70;
+    --warn:        #b58900;
+    --bad:         #e66767;
+    --radio:       14px;
+    --sombra:      0 1px 2px rgba(0, 0, 0, .40), 0 10px 28px rgba(0, 0, 0, .35);
+    --sombra-alta: 0 2px 4px rgba(0, 0, 0, .45), 0 18px 40px rgba(0, 0, 0, .45);
+}
+
+/* ---------- Tipografía (sin tocar los íconos) ---------- */
+html, body,
+[data-testid="stAppViewContainer"],
+[data-testid="stSidebar"],
+[data-testid="stHeader"] {
+    font-family: 'Inter', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Blindaje explícito de los íconos, por si algún otro estilo los pisa */
+[data-testid="stIconMaterial"],
+[data-testid="stExpanderToggleIcon"],
+span.material-symbols-rounded,
+[class*="material-symbols"] {
+    font-family: 'Material Symbols Rounded' !important;
+    font-weight: normal !important;
+    font-style: normal !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    white-space: nowrap;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    font-feature-settings: 'liga';
+}
+
+/* ---------- Fondos ---------- */
+[data-testid="stAppViewContainer"] {
+    background:
+        radial-gradient(1100px 500px at 15% -10%, rgba(74, 143, 240, .10), transparent 60%),
+        var(--bg);
+}
+[data-testid="stHeader"]  { background: transparent; }
+[data-testid="stToolbar"] { right: 1rem; }
+
+.block-container {
+    padding-top: 2.2rem;
+    padding-bottom: 3.5rem;
+    max-width: 1400px;
+}
+
+h1, h2, h3, h4 { color: var(--ink); font-weight: 700; letter-spacing: -0.02em; }
+h1 { font-size: 1.9rem; }
+h2 { font-size: 1.3rem; }
+h3 { font-size: 1.1rem; margin-top: .6rem; }
+p, span, label, li { color: var(--ink); }
+
+/* ---------- Barra lateral: compacta y con la navegación ---------- */
+section[data-testid="stSidebar"] {
+    background: var(--card);
+    border-right: 1px solid var(--borde-suave);
+    width: 244px !important;
+    min-width: 244px !important;
+}
+section[data-testid="stSidebar"] > div:first-child { padding-top: .9rem; }
+section[data-testid="stSidebar"] .block-container {
+    padding: 1rem .85rem 1rem .85rem;
+}
+section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] { gap: .18rem; }
+
+/* Marca */
+.marca { display: flex; align-items: center; gap: 10px; padding: 2px 4px 14px; }
+.marca svg { flex: 0 0 auto; display: block; }
+.marca-texto { display: flex; flex-direction: column; line-height: 1.15; }
+.marca-nombre { font-size: 1.05rem; font-weight: 700; color: #ffffff; letter-spacing: -.01em; }
+.marca-sub { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; }
+
+/* Navegación: botones con aspecto de menú.
+   Son botones y no un st.radio porque el menú necesita un encabezado de grupo
+   ("Matriz K&S") intercalado entre las opciones, y un radio no lo permite.
+   Los selectores usan data-testid y las clases st-key-<key> que Streamlit pone
+   por widget, no las clases generadas (st-emotion-cache-*), que cambian de
+   versión a versión. */
+.nav-grupo {
+    margin: 1rem 0 .3rem; padding: 0 12px;
+    font-size: .67rem; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; color: #79839a;
+}
+
+section[data-testid="stSidebar"] div.stButton > button {
+    justify-content: flex-start; text-align: left;
+    padding: 8px 12px; border-radius: 9px;
+    border: 1px solid transparent; border-left: 3px solid transparent;
+    background: transparent; color: var(--muted);
+    font-size: .92rem; font-weight: 600;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+/* El texto del botón vive en un contenedor propio: si no se lo estira y
+   alinea, queda centrado aunque el botón sea flex-start. */
+section[data-testid="stSidebar"] div.stButton > button > div,
+section[data-testid="stSidebar"] div.stButton > button [data-testid="stMarkdownContainer"] {
+    width: 100%; text-align: left; justify-content: flex-start;
+}
+section[data-testid="stSidebar"] div.stButton > button p {
+    text-align: left; margin: 0; width: 100%;
+}
+section[data-testid="stSidebar"] div.stButton > button:hover {
+    background: rgba(255, 255, 255, .05); color: var(--ink);
+    border-color: transparent; border-left-color: rgba(74, 143, 240, .45);
+    box-shadow: none;
+}
+/* la sección activa se marca con type="primary" */
+section[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
+    background: rgba(74, 143, 240, .15);
+    border-color: rgba(74, 143, 240, .28);
+    border-left-color: var(--brand);
+    color: #ffffff; box-shadow: none;
+}
+section[data-testid="stSidebar"] div.stButton > button[kind="primary"]:hover {
+    filter: none; background: rgba(74, 143, 240, .22); color: #ffffff;
+}
+
+/* Sub-opciones de un grupo: sangradas y un punto más chicas */
+section[data-testid="stSidebar"] .st-key-nav_analisis_estatico button,
+section[data-testid="stSidebar"] .st-key-nav_analisis_dinamico button {
+    padding-left: 26px; font-size: .88rem;
+}
+section[data-testid="stSidebar"] .st-key-nav_analisis_estatico,
+section[data-testid="stSidebar"] .st-key-nav_analisis_dinamico {
+    margin-left: 6px;
+}
+
+/* Pie: quién está conectado */
+.sidebar-pie { margin-top: 1.4rem; padding-top: .9rem; border-top: 1px solid var(--borde-suave); }
+.usuario { display: flex; flex-direction: column; line-height: 1.25; margin-bottom: .55rem; padding: 0 4px; }
+.usuario-nombre { font-size: .84rem; font-weight: 600; color: var(--ink);
+                  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.usuario-rol { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+/* El botón de cerrar sesión no es navegación: vuelve al estilo de botón */
+section[data-testid="stSidebar"] .st-key-cerrar_sesion button {
+    justify-content: center; text-align: center;
+    margin-top: .2rem;
+    background: var(--card-alto); border: 1px solid var(--borde);
+    border-left-width: 1px; color: var(--ink);
+    padding: .34rem .8rem; font-size: .82rem; font-weight: 500;
+}
+section[data-testid="stSidebar"] .st-key-cerrar_sesion button > div,
+section[data-testid="stSidebar"] .st-key-cerrar_sesion button p {
+    text-align: center; justify-content: center;
+}
+section[data-testid="stSidebar"] .st-key-cerrar_sesion button:hover {
+    border-color: var(--brand); border-left-color: var(--brand); color: #ffffff;
+}
+
+/* ---------- Encabezado de página ---------- */
+.page-header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 1rem; margin-bottom: 1.4rem;
+    border-bottom: 1px solid var(--borde-suave); padding-bottom: 1rem;
+}
+.page-header h1 { margin: 0; }
+.titulo-con-logo { display: flex; align-items: center; gap: 12px; }
+.titulo-con-logo svg { flex: 0 0 auto; }
+.page-header .subtitulo { color: var(--muted); font-size: .92rem; }
+
+/* ---------- Tarjetas KPI de st.metric ---------- */
+[data-testid="stMetric"] {
+    background: var(--card);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    padding: 18px 20px;
+    box-shadow: var(--sombra);
+}
+[data-testid="stMetricLabel"] p {
+    color: var(--muted); font-size: .78rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .05em;
+}
+[data-testid="stMetricValue"] { font-size: 1.9rem; font-weight: 700; color: var(--ink); }
+
+/* ---------- Tarjeta KPI propia ---------- */
+.kpi {
+    background: linear-gradient(180deg, var(--card-alto) 0%, var(--card) 100%);
+    border: 1px solid var(--borde);
+    border-left: 3px solid var(--brand);
+    border-radius: var(--radio);
+    padding: 18px 20px;
+    box-shadow: var(--sombra);
+    height: 100%;
+    transition: box-shadow .18s ease, transform .18s ease, border-color .18s ease;
+}
+.kpi:hover   { box-shadow: var(--sombra-alta); transform: translateY(-2px); }
+.kpi.ok      { border-left-color: var(--ok); }
+.kpi.warn    { border-left-color: var(--warn); }
+.kpi.bad     { border-left-color: var(--bad); }
+.kpi .kpi-label {
+    color: var(--muted); font-size: .75rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .06em; margin: 0 0 8px;
+}
+.kpi .kpi-valor {
+    color: #ffffff; font-size: 1.85rem; font-weight: 700;
+    line-height: 1.15; margin: 0; font-variant-numeric: tabular-nums;
+}
+.kpi .kpi-pie { color: var(--muted); font-size: .8rem; margin: 8px 0 0; }
+
+/* ---------- Panel ---------- */
+.panel {
+    background: var(--card);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    padding: 16px 20px;
+    box-shadow: var(--sombra);
+    margin-bottom: 1.1rem;
+    color: var(--ink);
+    font-size: .92rem;
+}
+.panel b { color: #ffffff; }
+
+[data-testid="stVerticalBlockBorderWrapper"] > div:first-child {
+    border-radius: var(--radio);
+}
+
+/* ---------- Pestañas ---------- */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 6px; border-bottom: 1px solid var(--borde-suave);
+}
+.stTabs [data-baseweb="tab"] {
+    height: 44px; padding: 0 18px; border-radius: 10px 10px 0 0;
+    color: var(--muted); font-weight: 600; background: transparent;
+}
+.stTabs [data-baseweb="tab"]:hover { color: var(--ink); background: rgba(255, 255, 255, .03); }
+.stTabs [aria-selected="true"] { color: #ffffff; background: rgba(74, 143, 240, .14); }
+.stTabs [data-baseweb="tab-highlight"] { background: var(--brand); }
+
+/* ---------- Botones ---------- */
+div.stButton > button,
+div.stFormSubmitButton > button,
+div.stDownloadButton > button {
+    border-radius: 10px;
+    font-weight: 600;
+    border: 1px solid var(--borde);
+    background: var(--card-alto);
+    color: var(--ink);
+    padding: .5rem 1.15rem;
+    transition: all .15s ease;
+}
+div.stButton > button:hover,
+div.stFormSubmitButton > button:hover,
+div.stDownloadButton > button:hover {
+    border-color: var(--brand); color: #ffffff; background: #232a3a;
+}
+div.stButton > button[kind="primary"],
+div.stFormSubmitButton > button[kind="primary"] {
+    background: var(--brand); border-color: var(--brand); color: #0b1220;
+}
+div.stButton > button[kind="primary"]:hover,
+div.stFormSubmitButton > button[kind="primary"]:hover {
+    filter: brightness(1.08);
+    box-shadow: 0 6px 18px rgba(74, 143, 240, .30);
+    color: #0b1220;
+}
+div.stButton > button:disabled { opacity: .45; }
+
+/* ---------- Campos ---------- */
+[data-baseweb="input"], [data-baseweb="select"] > div, [data-baseweb="textarea"] {
+    border-radius: 10px !important;
+    background-color: var(--card) !important;
+    border-color: var(--borde) !important;
+}
+[data-testid="stWidgetLabel"] p { color: var(--muted); font-weight: 600; font-size: .85rem; }
+
+/* ---------- Tablas ---------- */
+[data-testid="stDataFrame"], [data-testid="stDataEditor"] {
+    border-radius: var(--radio); overflow: hidden;
+    border: 1px solid var(--borde); box-shadow: var(--sombra);
+}
+
+/* ---------- Expanders ---------- */
+[data-testid="stExpander"] details {
+    background: var(--card);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra);
+}
+[data-testid="stExpander"] summary:hover { color: var(--brand); }
+
+/* ---------- Avisos ---------- */
+[data-testid="stAlert"] { border-radius: 12px; border: 1px solid var(--borde); }
+
+/* ---------- Subida de archivos ---------- */
+[data-testid="stFileUploaderDropzone"] {
+    background: var(--card);
+    border: 1px dashed var(--borde);
+    border-radius: var(--radio);
+}
+
+/* ---------- Etiquetas de clasificación ---------- */
+.tag { display:inline-block; padding:3px 10px; border-radius:999px; font-size:.75rem; font-weight:600; }
+.tag-estrella { background: rgba(25,158,112,.18);  color:#4fd1a5; }
+.tag-caballo  { background: rgba(57,135,229,.18);  color:#7db4f5; }
+.tag-puzzle   { background: rgba(181,137,0,.20);   color:#d8ac3a; }
+.tag-perro    { background: rgba(230,103,103,.18); color:#f09b9b; }
+
+/* ---------- Limpieza ---------- */
+#MainMenu { visibility: hidden; }
+footer    { visibility: hidden; }
+.stDeployButton { display: none; }
+hr { border-color: var(--borde-suave); }

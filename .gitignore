@@ -1,0 +1,39 @@
+# ---------------------------------------------------------------
+#  Credenciales — NUNCA al repositorio
+# ---------------------------------------------------------------
+.streamlit/secrets.toml
+
+# ---------------------------------------------------------------
+#  Datos reales de restaurantes
+#  Criterio: se ignora TODA planilla por defecto y se permiten solo
+#  las tres de ejemplo. Así, cualquier archivo con datos reales que
+#  dejes en la carpeta queda afuera del repositorio sin que tengas
+#  que acordarte de agregarlo acá.
+# ---------------------------------------------------------------
+*.xlsx
+*.xls
+*.csv
+!plantilla_imenu.xlsx
+!ejemplo_periodo_A.xlsx
+!ejemplo_periodo_B.xlsx
+
+# Carpeta para tus planillas de trabajo (creala si querés ordenar)
+datos/
+
+# Archivos temporales que Excel deja abiertos (~$nombre.xlsx)
+~$*
+
+# ---------------------------------------------------------------
+#  Entorno de Python
+# ---------------------------------------------------------------
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# ---------------------------------------------------------------
+#  Sistema operativo
+# ---------------------------------------------------------------
+Thumbs.db
+desktop.ini
+.DS_Store
